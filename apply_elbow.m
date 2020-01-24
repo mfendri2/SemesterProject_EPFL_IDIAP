@@ -1,0 +1,29 @@
+function [RSS]=apply_elbow(X,lambda,optsD,optsH,k_range,nb_runs)
+% This function applies the elbow method to find best number of atoms
+% for the dictionary learning and sparse coding
+% Copyright (c) 2019 Idiap Research Institute, http://idiap.ch/
+% Written by Hedi Fendri
+% Supervised by Sylvain Calinon, http://calinon.ch/
+% Created : 23/09/2019 
+% Last modified: 30/09/2019
+% 
+
+RSS_=zeros(length(k_range),nb_runs);
+AIC_=zeros(length(k_range),nb_runs);
+BIC_=zeros(length(k_range),nb_runs);
+[~,M]=size(X);
+
+for k = k_range
+    for i=1:nb_runs
+        [D,h,~]= dictionaryLearning(X,lambda,k,optsD,optsH);
+        Reconstructed=D*h; 
+        RSS_(k,i)=immse(X,Reconstructed);
+        B=size(D,1)*size(D,2);
+        AIC_(k,i)=RSS_(k,i)+B;
+        BIC_(k,i)=RSS_(k,i)+B*log(size(X,2));
+    end
+end
+RSS=mean(RSS_,2);
+% AIC=mean(AIC_,2);
+% BIC=mean(BIC_,2);
+end
